@@ -1,0 +1,208 @@
+table {
+  
+  border-collapse: collapse;
+  background-color: white;
+  border-radius: 10px;
+  overflow:auto;
+  border: 2px solid #1a1818;
+  table-layout: fixed; /* Add this property */
+}
+
+td,
+th {
+  border: none;
+  border: 1px solid #1a1818;
+  padding: 5px;
+  width: 100%; /* or max-width: 100% */
+}
+
+.scrollable-container {
+  
+  border-radius: 10px;
+  width: 95%;
+  overflow-x: scroll;
+  margin-bottom: 10px;
+ 
+}
+
+.sticky {
+  min-width: 800px;
+  position: sticky;
+  left: 0;
+  background-attachment: fixed;
+}
+
+
+td{
+white-space: pre;
+}
+
+.selected { 
+  border : 4px solid black;
+  background-color: lightgoldenrodyellow;
+}
+
+.parent {
+  
+  font-weight: bold;
+  position: relative;
+  background-color: grey;
+}
+.parent.selected {
+  border: 4px solid black; /* This will take priority over .parent's border */
+}
+
+
+#testCase {
+  background-color: white;
+}
+
+.status_bar{
+  margin-left: 700px;
+}
+
+.user-scrollable{
+  
+overflow-y: scroll;
+height:100px;
+scrollbar-width: none;
+-ms-overflow-style: none; 
+}
+
+
+.legend {
+  position: absolute;
+  top: -5px; /* Adjust as needed */
+  left:800px; /* Adjust as needed */
+  z-index: 10;
+  border-radius: 10px;
+  width: 400px;
+  background-color: rgb(221, 221, 221);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Optional for a shadow effect */
+}
+
+.legend button {
+  height: 20px;
+  background-color: rgb(221, 221, 221);
+  border: none;
+  margin-left:290px; /* Align to the end */
+}
+
+.legend button:hover {
+  background-color: rgb(221, 221, 221);
+  border: none;
+}
+
+#panel {
+  display: none; /* Initially hidden */
+}
+
+
+
+#Commit 
+{
+  font-weight: bold;
+  width:150px;
+
+background-color: rgb(70, 226, 76);
+border-radius:7px;
+}
+
+#insertTestLog
+{
+  font-weight: bold;
+  width:150px;
+background-color: rgb(234, 83, 3);
+border-radius:7px;
+display:none;
+}
+#switchToLog
+{font-weight: bold;
+  width:150px;
+
+background-color: rgb(84, 39, 156);
+border-radius:7px;
+
+}
+
+.testui-body{
+  background-color: rgb(228, 231, 233);
+  padding-bottom: 50px;
+}
+
+.flex
+{
+  display: flex;
+}
+.diagnol
+{
+height:50px;
+margin-top:25px;
+margin-left:27px;
+}
+
+.edit-phase-color{
+ color: blue;
+}
+.log-phase-color{
+  color:red;
+}
+
+
+
+
+#insCol {
+width: 100%;
+position: fixed;
+bottom: 0px;
+height: 10%;
+background-color: rgb(0, 0, 0);
+display: flex; /* Add this to make the footer a flex container */
+justify-content: space-between; /* Add this to evenly space the buttons */
+padding: 10px; /* Add some padding to the footer */
+}
+
+footer button {
+background: #fff;
+position: center;
+color: #000;
+font-weight: 600;
+border: none;
+padding: 2px 20px;
+cursor: pointer;
+border-radius: 3px;
+font-size: 16px;
+border: 2px solid transparent;
+transition: 0.3s ease;
+align-content: center;
+
+position: relative;
+margin: 0;
+top: 50%;
+-ms-transform: translateY(-50%);
+transform: translateY(-50%);
+vertical-align: middle;
+margin: 0 auto;
+text-align: center;
+display: table-cell;
+
+
+}
+
+
+
+.drop button:hover {
+color: #fff;
+border-color: #fff;
+background: rgba(255, 255, 255, 0.15);
+}
+
+.drop
+{
+  border-radius: 5px;
+  background-color: rgb(13, 14, 13);
+  color:chartreuse;
+}
