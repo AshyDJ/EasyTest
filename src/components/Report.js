@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-//import './report.css'; Note have to fix the css to not affect the testui table
+import Navbar2 from './Navbar2';
+//import './style.css'; //Note have to fix the css to not affect the testui table
 const Report = () => {
 
   const [versions, setVersions] = useState([]);
@@ -48,10 +49,11 @@ const Report = () => {
   };
 
 
-  <button id="generate" onClick={loadData}>
-*/
+ //Actua return to be used
+ 
   return (
     <>
+    <Navbar2 />
     <div class='report-body'>
     <div class="filter-container">
       <select id="version">
@@ -82,7 +84,7 @@ const Report = () => {
           </option>
         ))}
       </select>
-      <button id="generate" >
+       <button id="generate" onClick={loadData}>
         Generate Report
       </button>
     </div>
@@ -109,6 +111,113 @@ const Report = () => {
       </div>
       </>
   );
+  */
+ return(
+<>
+<Navbar2 />
+<body className='report-body'>
+  <h1>JAREDDAPROGRAMMER</h1>
+  <div class="filter-container">
+    <label for="version">Version:</label>
+    <select id="version">
+      <option>Version 1.1</option>
+      <option>Version 1.2</option>
+      <option>Version 1.3</option>
+    </select>
+    <label for="file">File:</label>
+    <select id="file">
+        <option>e2e</option>
+    <option>kekW</option>
+    <option>Screen</option>
+    </select>
+    <label for="testCase">Test Case:</label>
+    <select id="testCase">
+       <option>e2e</option>
+    <option>kekW</option>
+    <option>Screen</option>
+    </select>
+    <label for="status">Status:</label>
+    <select id="status">
+      <option value="">All</option>
+      <option value="pass">Pass</option>
+      <option value="fail">Fail</option>
+    </select>
+    <label for="errorCode">Error Code:</label>
+    <input type="text" id="errorCode" />
+    <label for="user">User:</label>
+    <select id="user">
+       <option></option>
+    <option>Ashish</option>
+    <option>Joshua</option>
+    </select>
+    <label for="timestamp">Timestamp:</label>
+    <input type="date" id="timestamp" />
+    <button id="generate">Apply Filter</button>
+  </div>
+  <div class="table-title">
+    
+</div>
+<table class="table-fill">
+<h3> WIP </h3>
+<thead>
+<tr>
+<th class="text-left">Version</th>
+<th class="text-left">File</th>
+<th class="text-left">Test Case</th>
+<th class="text-left">Status</th> 
+<th class="text-left">Error Code</th>
+<th class="text-left">User</th>
+<th class="text-left">Timestamp</th>
+</tr>
+</thead>
+<tbody class="table-hover">
+<tr>
+<td class="text-left">1.0</td>
+<td class="text-left">eg file </td>
+<td class="text-left">Opening</td>
+<td class="text-left">Pass</td>
+<td class="text-left">0</td>
+<td class="text-left">Loni</td>
+<td class="text-left">06-01-2021</td> 
+</tr>
+<tr>
+<td class="text-left">1.0</td>
+<td class="text-left">eg file </td>
+<td class="text-left">Opening</td>
+<td class="text-left">Pass</td>
+<td class="text-left">0</td>
+<td class="text-left">Loni</td>
+<td class="text-left">06-01-2021</td> 
+</tr>
+<tr>
+<td class="text-left">1.0</td>
+<td class="text-left">eg file </td>
+<td class="text-left">Opening</td>
+<td class="text-left">Pass</td>
+<td class="text-left">0</td>
+<td class="text-left">Loni</td>
+<td class="text-left">06-01-2021</td> 
+</tr>
+<tr>
+<td class="text-left">1.0</td>
+<td class="text-left">eg file </td>
+<td class="text-left">Opening</td>
+<td class="text-left">Pass</td>
+<td class="text-left">0</td>
+<td class="text-left">Loni</td>
+<td class="text-left">06-01-2021</td> 
+</tr>  
+ 
+
+</tbody>
+</table>
+
+</body>
+
+
+
+</>
+ );
 };
 
 export default Report;

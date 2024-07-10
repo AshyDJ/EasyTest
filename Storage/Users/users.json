@@ -3,5 +3,10 @@
     "name": "Loni",
     "email": "loni@gmail.com",
     "password": "$2b$10$xr00q9mO.jQLSgl2HWhLpe59KUAXvOpxfPhMV7QDlnBoSWL8fMKua"
+  },
+  {
+    "name": "Ashish",
+    "email": "ashishdj010@gmail.com",
+    "password": "$2a$10$YXLBculBuM3nBtfu2Pln0e0PYk7U2thj.UXbW/M5RDY7PSMX8bjRC"
   }
 ]

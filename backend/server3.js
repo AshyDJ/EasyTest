@@ -1,6 +1,6 @@
 var express=require("express");
 const cors = require("cors");
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 var bodyParser=require("body-parser");
 var session = require('express-session');
 var cookieParser = require('cookie-parser');

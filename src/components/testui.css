@@ -1,4 +1,4 @@
-table {
+#test-table {
   
   border-collapse: collapse;
   background-color: white;
@@ -8,15 +8,14 @@ table {
   table-layout: fixed; /* Add this property */
 }
 
-td,
-th {
+.testui-body td, th {
   border: none;
   border: 1px solid #1a1818;
   padding: 5px;
   width: 100%; /* or max-width: 100% */
 }
 
-.scrollable-container {
+.testui-body .scrollable-container {
   
   border-radius: 10px;
   width: 95%;
@@ -25,7 +24,7 @@ th {
  
 }
 
-.sticky {
+.testui-body .sticky {
   min-width: 800px;
   position: sticky;
   left: 0;
@@ -33,7 +32,7 @@ th {
 }
 
 
-td{
+.testui-body td{
 white-space: pre;
 }
 
@@ -53,7 +52,7 @@ white-space: pre;
 }
 
 
-#testCase {
+.testui-body #testCase {
   background-color: white;
 }
 
