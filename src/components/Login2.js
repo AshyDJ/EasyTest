@@ -3,12 +3,13 @@ import { useState } from 'react';
 import './style.css';
 import { useNavigate, Routes, Route, NavLink } from "react-router-dom";
 import PropTypes from 'prop-types';
+import fetchConfig from './Config';
+//const baseUrl = process.env.REACT_APP_API_BASE_URL;
 
-const baseUrl = process.env.REACT_APP_API_BASE_URL;
 
   async function LoginUser(credentials) {
-
-    return fetch(`${baseUrl}/login`,{
+    const config = await fetchConfig();
+    return fetch(`${config.backend_url}/login`,{
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -18,6 +19,8 @@ const baseUrl = process.env.REACT_APP_API_BASE_URL;
 
   }
   const Login2 = ({setToken}) => {
+
+
     
   const navigate=useNavigate();
   const [name, setName] = useState()
@@ -30,6 +33,7 @@ const baseUrl = process.env.REACT_APP_API_BASE_URL;
           name,
           password
       })
+      
       setToken(token)
       navigate('/folder', { state: { token } });
   }

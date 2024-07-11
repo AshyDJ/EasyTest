@@ -2,9 +2,9 @@
 import React, { useEffect,useState } from 'react';
 import { Routes, Route, NavLink } from "react-router-dom";
 import Navbar2 from './Navbar2';
+import fetchConfig from './Config';
 
-
-const baseUrl = process.env.REACT_APP_API_BASE_URL;
+//const baseUrl = process.env.REACT_APP_API_BASE_URL;
 const Folder = () => {
 
     const [data, setData] = useState(null);
@@ -15,9 +15,10 @@ const Folder = () => {
     var result; 
     
     const fetchData = async () => {
+        const config = await fetchConfig();
         console.log("fetch data called from folder file");
     try {
-        const response = await fetch(`${baseUrl}/readfolderData2`);
+        const response = await fetch(`${config.backend_url}/readfolderData2`);
         result = await response.json();
         setData(result);
         setfolders(result);
@@ -35,14 +36,15 @@ const Folder = () => {
 
 
 
-  const handleAddfolder = (e) => {
+  const handleAddfolder = async (e) => {
     e.preventDefault();
     var folderdata={
         foldname:newfolder,
     };
     folder.push(folderdata);
+    const config = await fetchConfig();
     
-    fetch(`${baseUrl}/savefolderData`, {
+    fetch(`${config.backend_url}/savefolderData`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

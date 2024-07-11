@@ -17,8 +17,21 @@ const path = require('path');
 const folderPath1 = path.dirname(__dirname)+"/Storage/data_folder";
 const folderPath2 = path.dirname(__dirname)+"/Storage/json_folder";
 
+//GEtting config backend url api's ip
 
 const app=express();
+
+app.get('/config', (req, res) => {
+  fs.readFile(path.join(path.dirname(__dirname), '/public/config.json'), 'utf8', (err, data) => {
+      if (err) {
+          return res.status(500).send('Error reading config file');
+      }
+      res.json(JSON.parse(data));
+  });
+});
+
+
+
 
 
 

@@ -20,8 +20,8 @@
     import Legend from "./Legend";
     import Navbar2 from "./Navbar2";
     import Status from "./Status";
-    const baseUrl = process.env.REACT_APP_API_BASE_URL;
-
+    //const baseUrl = process.env.REACT_APP_API_BASE_URL;
+    import fetchConfig from './Config';
   //const socket = io('http://192.168.250.90:5000');
 
 
@@ -49,11 +49,11 @@
 
 
       useEffect(() => {
-
+        
         const fetchData = async () => {
-          
+          const config = await fetchConfig();
           try {
-            const response = await fetch(`${baseUrl}/folder/${file}/testpad/${jfile}`);
+            const response = await fetch(`${config.backend_url}/folder/${file}/testpad/${jfile}`);
             const result = await response.text();
             setData(result);
             console.log(data);
@@ -107,8 +107,10 @@
       
       
         // Attach the editTestCase event handlers
+          
         newCell.each(function () {
             editTestCase(this);
+            setTime(this);
         });
         if(val===""){edit(newCell[0]);}
         
@@ -209,6 +211,7 @@
               }
               
           });
+              setTime(td);
         }
       }
       
@@ -417,7 +420,7 @@ function updateChildColorAndIndent(row)
           button.addEventListener('click', event => toggleButton(event.target));
       });
       
-      function readData() {
+      async function readData() {
         var tableData = [];
         $("[id^='row-']").each(function (index) {
             index++;
@@ -436,10 +439,10 @@ function updateChildColorAndIndent(row)
         });
     
     
-          
+        const config = await fetchConfig();
         
             // Send the data to the server
-            fetch(`${baseUrl}/folder/${file}/testpad/${jfile}/saveData`, {
+            fetch(`${config.backend_url}/folder/${file}/testpad/${jfile}/saveData`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json'
@@ -462,8 +465,9 @@ function updateChildColorAndIndent(row)
         });
         
         
-        function loadData() {
-          fetch(`${baseUrl}/folder/${file}/testpad/${jfile}/loadData`)
+        async function loadData() {
+          const config = await fetchConfig();
+          fetch(`${config.backend_url}/folder/${file}/testpad/${jfile}/loadData`)
             .then(response => {
               return response.json();
             })
@@ -532,6 +536,13 @@ function updateChildColorAndIndent(row)
         }
         
       }
+
+        function setTime(td) {
+            var user=token.user_name;
+            var timestamp = new Date().toLocaleString();
+            $(td).attr('data-meta', user + '-' + timestamp);
+        }
+          
 
       function colorRow(tr,flag)
       {
@@ -640,7 +651,7 @@ function updateChildColorAndIndent(row)
   
 
   $("#insertTestLog").off('click').on('click',function () {
-    var timestamp = new Date().toLocaleTimeString();
+    var timestamp = new Date().toLocaleString();
     if (!editing) {
       
         insertTestLogs(columnIndex, timestamp, [], [],token.user_name);
@@ -699,7 +710,8 @@ function insertTestLogs(col, timestamp, values, errorCodes,user_name) {
 
 
 
-function initRadios() {
+async function initRadios() {
+  const config = await fetchConfig();
   if (!editing) {
       var radios = document.querySelectorAll('[name^="radio-"]');
       Array.from(radios).forEach(function (radio) {
@@ -746,7 +758,7 @@ function initRadios() {
               radioData.push({rowlog:rowNumber,testlog:colNumber,radio:radio.value,err:error});
               
               
-              fetch(`${baseUrl}/folder/${file}/testpad/${jfile}/updateRadio`, {
+              fetch(`${config.backend_url}/folder/${file}/testpad/${jfile}/updateRadio`, {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json'
@@ -853,7 +865,8 @@ function initRadios() {
     }
   });
 
-  function readLogs() {
+  async function readLogs() {
+    const config = await fetchConfig();
     var testData = [];
     $("th[id^='tl-']").each(function () {
         var colIndex = $(this)
@@ -906,7 +919,7 @@ function initRadios() {
         });
         testData.unshift(rowData); // Move this line outside the inner loop
     });
-    fetch(`${baseUrl}/folder/${file}/testpad/${jfile}/saveLogData`, {
+    fetch(`${config.backend_url}/folder/${file}/testpad/${jfile}/saveLogData`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -915,10 +928,11 @@ function initRadios() {
     });
 }
 
-function loadLogs() {
+async function loadLogs() {
+  const config = await fetchConfig();
   //var testData = jsoninitData;
   console.log("Fetch Logs!");
-  fetch(`${baseUrl}/folder/${file}/testpad/${jfile}/loadLogData`, {
+  fetch(`${config.backend_url}/folder/${file}/testpad/${jfile}/loadLogData`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -1011,10 +1025,10 @@ return () => {
 //2. POLLLING FOR UPDATES - PROBLEM WITH TEST LOGS
 
 
-function pollForUpdates() {
-  
+async function pollForUpdates() {
+  const config = await fetchConfig();
   pollingIntervalId = setInterval(() => {
-    fetch(`${baseUrl}/folder/${file}/testpad/${jfile}/get-last-modified`)
+    fetch(`${config.backend_url}/folder/${file}/testpad/${jfile}/get-last-modified`)
       .then(response => response.json())
       .then(data => {
         if (!lastKnownModified || new Date(data.lastModified) > new Date(lastKnownModified)) {
@@ -1082,17 +1096,17 @@ function clearTable() {
     }
   };
 
-  const removeToken =  (e) => {
-    {
+  const removeToken =  async (e) => {
+    const config = await fetchConfig();
       alert("Session over");
-      fetch(`${baseUrl}/clear_User_status`, {
+      fetch(`${config.backend_url}/clear_User_status`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({user:token.user_name}),
       });
       sessionStorage.removeItem('token')
       navigate('/login') 
-    }
+    
   }
 
 
@@ -1137,8 +1151,10 @@ function clearTable() {
     
 
     const fetchActiveUsers = async (Phase) => {
+      
       try {
-        const response = await fetch(`${baseUrl}/User_status`, {
+        const config = await fetchConfig();
+        const response = await fetch(`${config.backend_url}/User_status`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({phase:Phase,user:token.user_name, url: window.location.pathname }),
