@@ -3,8 +3,8 @@ import { Routes, Route, NavLink } from "react-router-dom";
 import Testui from './Testui';
 import { useParams } from 'react-router-dom';
 import Navbar2 from './Navbar2';
-
-const baseUrl = process.env.REACT_APP_API_BASE_URL;
+import fetchConfig from './Config';
+//const baseUrl = process.env.REACT_APP_API_BASE_URL;
 const File = () => {
   
 
@@ -16,8 +16,9 @@ const File = () => {
     const { file } = useParams();
 
     const fetchData = async () => {
+      const config = await fetchConfig();
       try {
-          const response = await fetch(`${baseUrl}/folder/${file}/readfolderData`);
+          const response = await fetch(`${config.backend_url}/folder/${file}/readfolderData`);
           result = await response.json();
           setData(result);
           setFiles(result);
@@ -27,8 +28,9 @@ const File = () => {
         }
       }
       const fetchfolderData = async () => {
+        const config = await fetchConfig();
         try {
-            const response = await fetch(`${baseUrl}/folder/${file}`);
+            const response = await fetch(`${config.backend_url}/folder/${file}`);
             result = await response.json();
             setData(result);
             console.log(typeof(result));
@@ -48,15 +50,15 @@ const File = () => {
   const [type, setType] = useState('');
   var filearr=[];
 
-  const handleAddFile = (e) => {
+  const handleAddFile = async (e) => {
     e.preventDefault();
     var filedata={
         fname:newFile,
         type:type
     };
     filearr.push(filedata);
-    
-    fetch(`${baseUrl}/folder/${file}/savefileData`, {
+    const config = await fetchConfig();
+    fetch(`${config.backend_url}/folder/${file}/savefileData`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

@@ -3,8 +3,9 @@ import React from 'react'
 import { useState } from 'react'
 import './style.css';
 import { NavLink, useNavigate } from 'react-router-dom';
+import fetchConfig from './Config';
+//const baseUrl = process.env.REACT_APP_API_BASE_URL;
 
-const baseUrl = process.env.REACT_APP_API_BASE_URL;
 const Sign_up2 = () => {
   
     const [name,setName]=useState("");
@@ -13,8 +14,9 @@ const Sign_up2 = () => {
 
     const handleOnSubmit=async(e)=>{
         e.preventDefault();
+        const config = await fetchConfig();
         let result=await fetch(
-            `${baseUrl}/sign_up`,{
+            `${config.backend_url}/sign_up`,{
                 method:"POST",
                 body:JSON.stringify({name,email,password}),
                 headers:{
