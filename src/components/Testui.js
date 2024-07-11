@@ -107,8 +107,10 @@
       
       
         // Attach the editTestCase event handlers
+          
         newCell.each(function () {
             editTestCase(this);
+            setTime(this);
         });
         if(val===""){edit(newCell[0]);}
         
@@ -209,6 +211,7 @@
               }
               
           });
+              setTime(td);
         }
       }
       
@@ -534,6 +537,13 @@ function updateChildColorAndIndent(row)
         
       }
 
+        function setTime(td) {
+            var user=token.user_name;
+            var timestamp = new Date().toLocaleString();
+            $(td).attr('data-meta', user + '-' + timestamp);
+        }
+          
+
       function colorRow(tr,flag)
       {
         var row=tr;
@@ -641,7 +651,7 @@ function updateChildColorAndIndent(row)
   
 
   $("#insertTestLog").off('click').on('click',function () {
-    var timestamp = new Date().toLocaleTimeString();
+    var timestamp = new Date().toLocaleString();
     if (!editing) {
       
         insertTestLogs(columnIndex, timestamp, [], [],token.user_name);
