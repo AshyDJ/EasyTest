@@ -110,7 +110,7 @@
           
         newCell.each(function () {
             editTestCase(this);
-            setTime(this);
+            setTime(this,"");
         });
         if(val===""){edit(newCell[0]);}
         
@@ -211,7 +211,7 @@
               }
               
           });
-              setTime(td);
+              setTime(td,"");
         }
       }
       
@@ -432,7 +432,8 @@ function updateChildColorAndIndent(row)
             var rowData = {
                 index: ind,
                 text: textContent.trim(),                // Trim to remove leading/trailing whitespace
-                parent: $("#row-" + ind).data("parent")
+                parent: $("#row-" + ind).data("parent"),
+                meta: $("#tc-" + ind).data("meta")
             };
             tableData.push(rowData);
           }
@@ -490,7 +491,7 @@ function updateChildColorAndIndent(row)
                 }
         
                 insertTestCase($("#insertTest"), item.index, item.text, item.parent);
-              
+                  setTime($('#tc-'+item.index),item.meta);
               });
               rowCount++;
               
@@ -537,10 +538,14 @@ function updateChildColorAndIndent(row)
         
       }
 
-        function setTime(td) {
+        function setTime(td,meta) {
+            if(meta===""){
             var user=token.user_name;
             var timestamp = new Date().toLocaleString();
             $(td).attr('data-meta', user + '-' + timestamp);
+        }
+            else
+                $(td).attr('data-meta', meta);
         }
           
 
