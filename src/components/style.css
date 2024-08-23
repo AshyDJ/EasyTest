@@ -316,6 +316,7 @@ nav a.active{
   font-size: 2rem;
   margin-bottom: 20px;
   color: #fff;
+  background-color: #118D6C;
 }
 .input-field {
   position: relative;
