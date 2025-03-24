@@ -15,10 +15,10 @@ const Folder = () => {
     var result; 
     
     const fetchData = async () => {
-        const config = await fetchConfig();
+        //const config = await fetchConfig();
         console.log("fetch data called from folder file");
     try {
-        const response = await fetch(`${config.backend_url}/readfolderData2`);
+        const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/readfolderData2`);
         result = await response.json();
         setData(result);
         setfolders(result);
@@ -36,38 +36,52 @@ const Folder = () => {
 
 
 
-  const handleAddfolder = async (e) => {
+  const handleCreateFolder = async (e) => {
     e.preventDefault();
     var folderdata={
         foldname:newfolder,
     };
     folder.push(folderdata);
-    const config = await fetchConfig();
+    //const config = await fetchConfig();
     
-    fetch(`${config.backend_url}/savefolderData`, {
+    fetch(`${process.env.REACT_APP_BACKEND_URL}/savefolderData`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(folderdata)
     });
-    fetchData();
     setNewfolder('');
-    
+    fetchData();
   };
-/*
-<h2>Tests:</h2>
-      {
-      folders.map((folder, index) => (
-        <div key={index}>
-          <NavLink to={`/folder/file`}>{index+1}. {folder}</NavLink>
-        </div>
-      ))
-      }
-      
 
-*/
 
+  const handleDeleteFolder = async (e) => {
+    e.preventDefault();
+    // eslint-disable-next-line no-restricted-globals
+    if(!confirm(`Are you sure you want to delete ${newfolder} permanently?`))
+      return;
+
+    var folderdata={
+        foldname:newfolder,
+    };
+    folder.push(folderdata);
+    //const config = await fetchConfig();
+    
+    const response=await fetch(`${process.env.REACT_APP_BACKEND_URL}/deletefolderData`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(folderdata)
+    });
+    if(response.status==409)
+    alert(`First delete ${newfolder}'s contents`)
+    else if(response.status==404)
+    alert(`Folder Not Found`)
+    setNewfolder('');
+    fetchData();
+  };
 
 return (
   <>
@@ -85,8 +99,7 @@ return (
     ))
     } </ul>
   <div class="file-folder-wrapper">
-    <form class="folder-file-form" onSubmit={handleAddfolder}>
-    <h2>Create New Folder</h2>
+    <form class="folder-file-form">
     <div class="input-field-folder-file">
       <input
         type="text"
@@ -94,9 +107,10 @@ return (
         onChange={(e) => setNewfolder(e.target.value)}
         required
       />
-      <label>Enter new Folder name</label>
+      <label>Enter Folder name</label>
       </div>
-      <button className='folder-file-button' type="submit">Add Folder</button>
+      <button className='folder-file-button' onClick={handleCreateFolder}>Create Folder</button>
+      <button className='folder-file-button' onClick={handleDeleteFolder}>Delete Folder</button>
     </form>
     </div>
   </div>

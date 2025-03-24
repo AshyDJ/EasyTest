@@ -8,6 +8,8 @@ const crypto = require("crypto");
 const fs = require('fs');
 const path = require('path');
 
+const fsp=require('fs').promises;
+
 
 //Backend folders
 //const folderPath1 = path.join(__dirname, 'data_folder');
@@ -107,15 +109,23 @@ const emailCheck=(json)=>{
     fs.readFile(path.dirname(__dirname)+"/Storage/Users/users.json", async function (err, data1) {  
     var json = JSON.parse(data1);
 
-if(emailCheck(json) || nameCheck(json))//Same Userid  or email exists
+if(nameCheck(json))//Same Userid  
     {
         
         //can send response here sayin it exists
             req.body.name="";
             req.body.email="";
             req.body.password="";
-            return resp.send(req.body);
+            return resp.status(401).send(req.body);
             
+    }
+    else if(emailCheck(json))//or email exists
+    {
+       //can send response here sayin it exists
+       req.body.name="";
+       req.body.email="";
+       req.body.password="";
+       return resp.status(402).send(req.body);
     }
     else
     {
@@ -131,7 +141,8 @@ if(emailCheck(json) || nameCheck(json))//Same Userid  or email exists
 
 //send response
 req.session.user = data;
-resp.send(req.body);
+var token = crypto.randomBytes(64).toString('hex');
+resp.status(200).send({token:token,user_name:name});
 });
 });
 
@@ -201,12 +212,17 @@ app.get('/folder/:file/testpad/:jfile/get-last-modified', (req, res) => {
 app.post("/folder/:file/testpad/:jfile/saveData", async (req, resp) => {
   const Data=req.body;
   var filename=req.params.file;
-  var jfilename=req.params.jfile;
+  var jfilename=req.params.jfile+".json";
   //console.log(path.join(folderPath2+"/"+filename,jfilename));
   lastModified = new Date();
    saveData(Data, path.join(folderPath2+"/"+filename,jfilename));
    resp.send("saved")
 });
+
+
+
+
+
 
 const saveData = (tableData, file) => {
    const finished = (error) => {
@@ -239,23 +255,12 @@ const readData = (file, callback) => {
        }
    });
 };
-/*
-app.get("/file/:test", (req, resp) => {
-  
-    var x=req.params.test;
-    console.log(x);
-    resp.send('<h1>HEllo</h1>'+x);
-});
 
-app.get("/file", (req, resp) => {
-  
-  resp.send('<h1>HEllo</h1>');
-});
-*/
 app.get("/folder/:file/testpad/:jfile", (req, resp) => {  
   var jfilename=req.params.jfile;
   resp.send(`<h1>HEllo</h1>${jfilename}`);
 });
+
 app.post("/folder/:file/savefileData", async (req, resp) => {
   var filename=req.params.file;
   console.log("filename",filename)
@@ -272,6 +277,29 @@ app.post("/folder/:file/savefileData", async (req, resp) => {
    resp.send("saved")
 });
 
+app.post("/folder/:file/deletefileData", async (req, resp) => {
+  var filename = req.params.file;
+  console.log("filename:", filename);
+  const Data = req.body;
+
+  let file1 = path.join(folderPath2, filename, Data.fname + ".json");
+  let file2 = path.join(folderPath1, filename, Data.fname + "_Log.json");
+
+  try {
+    await fsp.unlink(file1);
+    await fsp.unlink(file2);
+    return resp.status(200).send("Deleted file successfully");
+  } catch (error) {
+    if (error.code === "ENOENT") {
+      return resp.status(404).send("File not found");
+    }
+    return resp.status(500).send("Error deleting file");
+  }
+});
+
+
+
+
 app.get("/folder/:file/readfolderData", async (req, resp) => {
   var filename=req.params.file;
   
@@ -283,9 +311,11 @@ app.get("/folder/:file/readfolderData", async (req, resp) => {
       return;
     }
     // Filter out only .json files
-    // const jsonFiles = files.filter(file => path.extname(file) === '.json');
-    // Send the names of the JSON files as the response
-    const alljsonFiles=files;//
+    const alljsonFiles = files
+    .filter(file => path.extname(file) === ".json") // Keep only .json files
+    .map(file => path.basename(file, ".json"));    // Send the names of the JSON files as the response
+    //const alljsonFiles=files;
+    console.log(alljsonFiles)
     resp.json(alljsonFiles);
   });
 });
@@ -328,6 +358,23 @@ app.post("/savefolderData", async (req, resp) => {
 });
 
 
+app.post("/deletefolderData", async (req, resp) => {
+  const Data=req.body;
+  try {
+  fs.rmdirSync(path.join(folderPath2,Data.foldname));
+  fs.rmdirSync(path.join(folderPath1,Data.foldname));
+  resp.status(200).send("Folder deleted Successfully")
+  }
+  catch (error) {
+      if (error.code === "ENOTEMPTY")
+      return  resp.status(409).send("Folder not empty");
+      else if (error.code === "ENOENT")
+      return  resp.status(404).send("Folder not found");
+    }
+
+});
+
+
 
 //Log commiting and loading
 
@@ -336,7 +383,7 @@ app.post("/folder/:file/testpad/:jfile/saveLogData", async (req, resp) => {
     const Data=req.body;
     var jfilename=req.params.jfile;
     var filename=req.params.file;
-    var jfilename_Log=(jfilename.substring(0,jfilename.lastIndexOf(".")))+"_Log.json";
+    var jfilename_Log=jfilename+"_Log.json";
     //console.log(path.join(folderPath1+"/"+filename,jfilename_Log));
      saveData(Data, path.join(folderPath1+"/"+filename,jfilename_Log));
      
@@ -346,10 +393,11 @@ app.post("/folder/:file/testpad/:jfile/saveLogData", async (req, resp) => {
 
 
   app.post("/folder/:file/testpad/:jfile/loadLogData", async (req, resp) => {
-    console.log("Check!")
+    
     var jfilename=req.params.jfile;
     var filename=req.params.file;
-    var jfilename_Log = (jfilename.substring(0, jfilename.lastIndexOf("."))) + "_Log.json";
+    console.log("Check!",jfilename,filename)
+    var jfilename_Log = jfilename + "_Log.json";
     //console.log(path.join(folderPath1 + "/" + filename, jfilename_Log));
   
     if (!jfilename_Log) {
@@ -368,7 +416,7 @@ app.post("/folder/:file/testpad/:jfile/saveLogData", async (req, resp) => {
 
 
   app.get("/folder/:file/testpad/:jfile/loadData", async (req, res) => {
-    var jfilename=req.params.jfile;
+    var jfilename=req.params.jfile+".json";
     var filename=req.params.file;
     console.log("Load called?",filename,jfilename);
     if (!jfilename) {
@@ -442,7 +490,7 @@ app.post('/clear_User_status', async(req,resp)=>{
 
     console.log(testlog,rowlog,value)
 
-    var jfilename_Log = (jfilename.substring(0, jfilename.lastIndexOf("."))) + "_Log.json";
+    var jfilename_Log = jfilename + "_Log.json";
     //console.log(path.join(folderPath1 + "/" + filename, jfilename_Log));
   
     if (!jfilename_Log) {
@@ -470,7 +518,46 @@ app.post('/clear_User_status', async(req,resp)=>{
     });
 
 
+//Send a new rowCount
+app.get("/folder/:file/testpad/:jfile/generateRowCount", async (req, res) => {
+  var jfilename=req.params.jfile+".json";
+  var filename=req.params.file;
+  if (!jfilename) {
+    return res.status(400).send("jfilename not set");
+  }
+   readData(path.join(folderPath2+"/"+filename,jfilename), (err, data) => {
+       if (err) {
+        res.json(0);
+       } else {
+        var rowCount=-1;
+           for(const row of data)
+            rowCount = rowCount > parseInt(row.index, 10) ? rowCount : row.index;
+           res.json(Number(rowCount)); 
+       }
+   });
+});
 
+//Check if row present in file
+app.post("/folder/:file/testpad/:jfile/checkRowPresent", async (req, res) => {
+  var jfilename=req.params.jfile+".json";
+  var filename=req.params.file;
+  var requested_row_index=req.body.index;
+  if (!jfilename) {
+    return res.status(400).send("jfilename not set");
+  }
+   readData(path.join(folderPath2+"/"+filename,jfilename), (err, data) => {
+       if (err) {
+           res.status(500).send("Error reading data");
+       } else {
+        for(const row of data)
+        {
+          if(row.index==requested_row_index)
+            return res.status(200).send("FOUND ROW");
+        }
+        return res.status(400).send("Row not found in file");
+       }
+   });
+});
 
 
 
