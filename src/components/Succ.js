@@ -1,13 +1,9 @@
 import React from 'react'
-import { useState, useEffect } from 'react';
-import { useNavigate, Routes, Route } from "react-router-dom";
-import { useLocation } from 'react-router-dom';
+import { useNavigate} from "react-router-dom";
 import { NavLink } from 'react-router-dom'
-import Testui from './Testui';
-import File from './File';
 import Folder from './Folder';
-import Navbar2 from './Navbar2';
-const baseUrl = process.env.REACT_APP_API_BASE_URL;
+import fetchConfig from './Config';
+//const baseUrl = process.env.REACT_APP_API_BASE_URL;
 function getToken()
 {
   const tokenString = sessionStorage.getItem('token')
@@ -16,17 +12,12 @@ function getToken()
 }
 
 
-
-
-
-
-
-const Succ = ({ route }) => {
+const Succ = () => {
   const navigate=useNavigate();
- 
- const removeToken =  (e) => {
-{
-  fetch(`${baseUrl}/clear_User_status`, {
+  
+ const removeToken =  async (e) => {
+  //const config = await fetchConfig();
+  fetch(`${process.env.REACT_APP_BACKEND_URL}/clear_User_status`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({user:token.user_name}),
@@ -34,12 +25,9 @@ const Succ = ({ route }) => {
 
   sessionStorage.removeItem('token')
   navigate('/login') 
-}
  }
 
-  
-  //const location = useLocation();
-  //const { token } = location.state || {};
+
   const token=getToken();
   console.log("Token=",token);
   if(!token){
@@ -49,34 +37,12 @@ const Succ = ({ route }) => {
       </div>)
   }
   else{
-    /*
-  return (
-    <div>
-      <h1>Your Test Pad site</h1>
-      <h1>User:{token.user_name}</h1>
-      <button onClick={removeToken}>Logout</button>
-    </div>
-  )
-    */
    return(
     <>
     <Folder />
-    <br></br>
-    <button onClick={removeToken}>Logout</button>
     </>
    )
 }
 }
 
 export default Succ
-
-/*
-fetch('http://192.168.250.90:5000/saveLogData', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json'
-  },
-  body: JSON.stringify(testData)
-});
-
-*/

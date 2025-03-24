@@ -22,7 +22,7 @@ function App() {
 
     <Routes>
       <Route path='/' element={<Home />} />
-      <Route path='/sign_up' element={<Sign_up2 />} />
+      <Route path='/sign_up' element={<Sign_up2 setToken={setToken}/>} />
       <Route path='/login' element={<Login2 setToken={setToken}/>} />
       <Route path='/folder' element={<Succ />} />
       <Route path='/folder/:file' element={<File />} />

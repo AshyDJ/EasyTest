@@ -51,9 +51,9 @@
       useEffect(() => {
         
         const fetchData = async () => {
-          const config = await fetchConfig();
+          //const config = await fetchConfig();
           try {
-            const response = await fetch(`${config.backend_url}/folder/${file}/testpad/${jfile}`);
+            const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/folder/${file}/testpad/${jfile}`);
             const result = await response.text();
             setData(result);
             console.log(data);
@@ -77,7 +77,7 @@
         function editTestCase(td) {
           var timer;
           td.onclick = function () {
-              console.log("CLicked!");
+              //console.log("CLicked!");
               if (timer) 
                   clearTimeout(timer);
               timer = setTimeout(function () {
@@ -91,8 +91,10 @@
               edit(td);
           }
       }
-      function insertTestCase(td, id, val, parent) {
-        console.log(td, id, val, parent);
+
+
+      function insertTestCase(td, id, val, parent,loadDataCall) {
+        console.log(id);
         var newRow = $("<tr>")
             .attr("id", "row-" + id)
             .attr("data-parent", parent);
@@ -105,22 +107,42 @@
         indentSpace(newRow,1);
         td.before(newRow);
       
-      
+        //Auto commit a blank 
+        if(!loadDataCall)
+        {
+          console.log("space saved")
+          readData();
+          if(val===""){edit(newCell[0]);}
+        }  
+        
+
         // Attach the editTestCase event handlers
           
         newCell.each(function () {
             editTestCase(this);
             setTime(this,"");
         });
-        if(val===""){edit(newCell[0]);}
+        //if(val===""){edit(newCell[0]);}
         
     }
-    $("#newField").keypress(function (event) {
+
+
+    $("#newField").off("keydown").on("keydown", async function (event) {
+      //const config = await fetchConfig();
       $("tr").removeClass("selected");
         if (event.key === 'Enter' && $("#newField").val() != "") {
             console.log("rowc2:", rowCount);
-            insertTestCase($("#insertTest"), rowCount, $("#newField").val(), '0'); // enter key pressed
-            rowCount++;
+
+            //receive a unique rowCount
+            const response =await fetch(`${process.env.REACT_APP_BACKEND_URL}/folder/${file}/testpad/${jfile}/generateRowCount`, {
+              method: 'GET',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+          })
+          rowCount=await response.json();
+
+            insertTestCase($("#insertTest"), rowCount+1, $("#newField").val(), '0',false); // enter key pressed
             $("#newField").val('');
         }
     });
@@ -188,9 +210,16 @@
                     // Insert the button after editing completes
                     insertButton(td);
                 }
+                
+                
                 if(input.value===""){
                   deleteTestCase($(td).closest('tr'))
-              }
+                }
+                
+              
+              //Auto - commit after edit
+              readData();
+
             }
         };
         //
@@ -204,14 +233,16 @@
                       // Insert the button after editing completes
                       insertButton(td);
                   }
+                  /*
+                  //Deletes all empty rows if click event occurs outside the selected row
                   if(input.value===""){
                     deleteTestCase($(td).closest('tr'))
-                }
+                  }
+                  */
                 $(document).off('click.edit');
               }
               
           });
-              setTime(td,"");
         }
       }
       
@@ -225,21 +256,20 @@
         { edit(td); }
 
         $(document).off('keydown').on("keydown", function(event) {
-            console.log(event.key);
+            //console.log(event.key);
           if(editing){
           if (event.key === "Tab"  && !event.shiftKey) {
-            
             makeParent(row);
-          } else if (event.key === "Tab" && event.shiftKey) {
-            
+          } else if (event.key === "Tab" && event.shiftKey) {  
             unmakeParent(row);
           } else if (event.key === "Enter") {
             insert(row); // default value for val
           } else if (event.key === "Delete") {
-            
             deleteTestCase(row);
           }
-          
+          else if(event.key === "q" && event.ctrlKey){
+            edit(td);
+          }
           //If we want arrow key select Chat gpt functions
           else if (event.key === "ArrowUp") {
             event.preventDefault();
@@ -250,7 +280,6 @@
           }
           else if(event.key==="Escape")
           {
-            
             if(row.find("td:first").find("button")[0])
             toggleButton(row.find("td:first").find("button")[0]);           
           }
@@ -327,7 +356,7 @@ function updateChildColorAndIndent(row)
     }
 
 
-    function insert(row) {
+    async function insert(row) {
       console.log("Enter row found");
       if (row.hasClass("selected")) {
         var button = row.find("td:first").find("button"); // Find the button element inside the first td element
@@ -338,7 +367,19 @@ function updateChildColorAndIndent(row)
     
         console.log("place id:", place.attr("id"))
         console.log((row.td));
-        insertTestCase(place, rowCount++, "", parent);
+
+        //receive a unique rowCount
+        //const config = await fetchConfig();
+        const response =await fetch(`${process.env.REACT_APP_BACKEND_URL}/folder/${file}/testpad/${jfile}/generateRowCount`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+        })
+        rowCount=await response.json();
+        console.log("RETURNED ROW COUNT="+rowCount);
+
+        insertTestCase(place, rowCount+1, "", parent,false);
         console.log("INsert finished!");        
         var newTd = place.prev().find('td');
         select(newTd);
@@ -347,16 +388,48 @@ function updateChildColorAndIndent(row)
     }
       
       // Delete test case (Delete)
-      function deleteTestCase(row) {
-          if (row.hasClass("parent")) {
-              unmakeParent(row);
+      async function deleteTestCase(row) {
+        console.log(row.attr('id').replace('row-', ''));
+        //const config = await fetchConfig();
+
+        //http request rto check if row exists in file
+        const response =await fetch(`${process.env.REACT_APP_BACKEND_URL}/folder/${file}/testpad/${jfile}/checkRowPresent`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({index:row.attr('id').replace('row-', '')})
+        })
+
+        if(response.status==200)
+        {
+          // eslint-disable-next-line no-restricted-globals
+          if (row.hasClass("parent") && confirm("Are you sure?")) {
+            //alert for parent deleteion case before saving
+            unmakeParent(row);
+            var newTd=row.prev().find('td:first');
+            //if (!newTd) newTd=row.next().find('td'); Deleteing first row makes auto select-delete disappear
+            row.remove();
+            select(newTd);
+      
+            //Auto-commit on delete
+            readData();
           }
-          var newTd=row.prev().find('td:first');
-          //if (!newTd) newTd=row.next().find('td'); Deleteing first row makes auto select-delte disappear
-      row.remove();
-      select(newTd);
-    
+          else if(!row.hasClass("parent")){
+            var newTd=row.prev().find('td:first');
+            //if (!newTd) newTd=row.next().find('td'); Deleteing first row makes auto select-delete disappear
+            row.remove();
+            select(newTd);
+      
+            //Auto-commit on delete
+            readData();
+          }
+        }
+        else{
+          alert("Row not found");
+        }
       }
+
       //Doesnt do anything
       $('[id^="tc-"]').each(function() {
         console.log("I am running");
@@ -428,7 +501,7 @@ function updateChildColorAndIndent(row)
             rowCount = rowCount > ind ? rowCount : ind;
 
             var textContent = $("#tc-" + ind).clone().children().remove().end().text();
-            if(textContent.trim()!=""){
+            //if(textContent.trim()!=""){
             var rowData = {
                 index: ind,
                 text: textContent.trim(),                // Trim to remove leading/trailing whitespace
@@ -436,14 +509,14 @@ function updateChildColorAndIndent(row)
                 meta: $("#tc-" + ind).data("meta")
             };
             tableData.push(rowData);
-          }
+          //}
         });
     
     
-        const config = await fetchConfig();
+        //const config = await fetchConfig();
         
             // Send the data to the server
-            fetch(`${config.backend_url}/folder/${file}/testpad/${jfile}/saveData`, {
+            fetch(`${process.env.REACT_APP_BACKEND_URL}/folder/${file}/testpad/${jfile}/saveData`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json'
@@ -467,8 +540,8 @@ function updateChildColorAndIndent(row)
         
         
         async function loadData() {
-          const config = await fetchConfig();
-          fetch(`${config.backend_url}/folder/${file}/testpad/${jfile}/loadData`)
+          //const config = await fetchConfig();
+          fetch(`${process.env.REACT_APP_BACKEND_URL}/folder/${file}/testpad/${jfile}/loadData`)
             .then(response => {
               return response.json();
             })
@@ -482,7 +555,7 @@ function updateChildColorAndIndent(row)
                 var row = $("<tr id='row-" + item.index + "'>");
                 
                 rowCount = rowCount > parseInt(item.index, 10) ? rowCount : item.index;
-                console.log("ROWOWOWOWCOUNT=",rowCount);
+                //console.log("ROWOWOWOWCOUNT=",rowCount);
                 var td = $("<td id='tc-" + item.index + "'>" + item.text + "</td>");
                 row.append(td);
         
@@ -491,7 +564,7 @@ function updateChildColorAndIndent(row)
                 }
         
                 insertTestCase($("#insertTest"), item.index, item.text, item.parent);
-                  setTime($('#tc-'+item.index),item.meta);
+              
               });
               rowCount++;
               
@@ -509,7 +582,7 @@ function updateChildColorAndIndent(row)
       */
         if(!hasInitialized.current){
           loadData();
-          pollForUpdates();
+          //pollForUpdates();
         hasInitialized.current = true;
         }
       
@@ -538,6 +611,16 @@ function updateChildColorAndIndent(row)
         
       }
 
+      function setTime(td,meta) {
+        if(meta===""){
+        var user=token.user_name;
+        var timestamp = new Date().toLocaleString();
+        $(td).attr('data-meta', user + '-' + timestamp);
+    }
+        else
+            $(td).attr('data-meta', meta);
+    }
+
         function setTime(td,meta) {
             if(meta===""){
             var user=token.user_name;
@@ -553,13 +636,13 @@ function updateChildColorAndIndent(row)
       {
         var row=tr;
         var indent=findIndent(tr)
-        console.log("indent:",indent);
+        //console.log("indent:",indent);
         if(flag===1)
           indent--;
         //Blue light to solid
         var gshade = 204 - (indent * 27);
         var rshade = 153 - (indent * 51);
-        console.log("Chck1");
+        //console.log("Chck1");
         row.css('backgroundColor',`rgb(${rshade},${gshade},255)`); // set the background color
         row.find("td").css('backgroundColor',`rgb(${rshade},${gshade},255)`);
         //Green light to Solid
@@ -601,7 +684,7 @@ function updateChildColorAndIndent(row)
       function findIndent(tr) {
         var indent = 0;
         var row=tr;
-        console.log($(tr).id);
+        //console.log($(tr).id);
         while (tr.attr('data-parent')!= 0) {
           indent += 1;
           tr = $("#row-" + tr.data('parent'));
@@ -716,7 +799,7 @@ function insertTestLogs(col, timestamp, values, errorCodes,user_name) {
 
 
 async function initRadios() {
-  const config = await fetchConfig();
+  //const config = await fetchConfig();
   if (!editing) {
       var radios = document.querySelectorAll('[name^="radio-"]');
       Array.from(radios).forEach(function (radio) {
@@ -763,7 +846,7 @@ async function initRadios() {
               radioData.push({rowlog:rowNumber,testlog:colNumber,radio:radio.value,err:error});
               
               
-              fetch(`${config.backend_url}/folder/${file}/testpad/${jfile}/updateRadio`, {
+              fetch(`${process.env.REACT_APP_BACKEND_URL}/folder/${file}/testpad/${jfile}/updateRadio`, {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json'
@@ -871,7 +954,7 @@ async function initRadios() {
   });
 
   async function readLogs() {
-    const config = await fetchConfig();
+    //const config = await fetchConfig();
     var testData = [];
     $("th[id^='tl-']").each(function () {
         var colIndex = $(this)
@@ -924,7 +1007,7 @@ async function initRadios() {
         });
         testData.unshift(rowData); // Move this line outside the inner loop
     });
-    fetch(`${config.backend_url}/folder/${file}/testpad/${jfile}/saveLogData`, {
+    fetch(`${process.env.REACT_APP_BACKEND_URL}/folder/${file}/testpad/${jfile}/saveLogData`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -934,10 +1017,10 @@ async function initRadios() {
 }
 
 async function loadLogs() {
-  const config = await fetchConfig();
+  //const config = await fetchConfig();
   //var testData = jsoninitData;
   console.log("Fetch Logs!");
-  fetch(`${config.backend_url}/folder/${file}/testpad/${jfile}/loadLogData`, {
+  fetch(`${process.env.REACT_APP_BACKEND_URL}/folder/${file}/testpad/${jfile}/loadLogData`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -990,7 +1073,7 @@ $("#switchToLog").off('click').on('click',function () {
     setPhase(false);
     fetchActiveUsers(Phase);
 
-    stopPolling();
+    //stopPolling();
     toggleTimeout(); //prevents insertTestlog for some reason
     fetchActiveUsers(Phase);
   }
@@ -1000,7 +1083,7 @@ $("#switchToLog").off('click').on('click',function () {
 
 
 
-//Concurrency fixes
+
 
 //1.Time out feature
 const handleUserActivity = () => {
@@ -1027,8 +1110,8 @@ return () => {
   //stopPolling();
 };
 
+/*
 //2. POLLLING FOR UPDATES - PROBLEM WITH TEST LOGS
-
 
 async function pollForUpdates() {
   const config = await fetchConfig();
@@ -1067,8 +1150,7 @@ function clearTable() {
 }
 
 }
-
-
+*/
 
 
 
@@ -1078,7 +1160,7 @@ function clearTable() {
 
 
     const idleTimeoutRef = useRef(null);
-    const IDLE_TIMEOUT = 300000; // 5 minutes in milliseconds
+    const IDLE_TIMEOUT = 1800000; // 30 minutes in milliseconds
     
 
     const toggleTimeout = () => {
@@ -1102,9 +1184,9 @@ function clearTable() {
   };
 
   const removeToken =  async (e) => {
-    const config = await fetchConfig();
+    //const config = await fetchConfig();
       alert("Session over");
-      fetch(`${config.backend_url}/clear_User_status`, {
+      fetch(`${process.env.REACT_APP_BACKEND_URL}/clear_User_status`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({user:token.user_name}),
@@ -1158,8 +1240,8 @@ function clearTable() {
     const fetchActiveUsers = async (Phase) => {
       
       try {
-        const config = await fetchConfig();
-        const response = await fetch(`${config.backend_url}/User_status`, {
+        //const config = await fetchConfig();
+        const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/User_status`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({phase:Phase,user:token.user_name, url: window.location.pathname }),
@@ -1189,7 +1271,7 @@ function clearTable() {
           <thead id="table-head">
           <tr>
             <th id="testCase" class="sticky">Test Cases
-            HTML{!hideLegend && <Legend />}
+            {!hideLegend && <Legend />}
             </th>
           </tr>
         </thead>

@@ -38,6 +38,10 @@
   opacity: 0;
   transition: all 0.5s ease;
 }
+.sidebar .logo-details .logo_name a{
+  text-decoration: none;
+  color :#fff;
+}
 .sidebar.open .logo-details .icon,
 .sidebar.open .logo-details .logo_name{
   opacity: 1;
@@ -185,6 +189,28 @@
 .sidebar.open li.profile{
   width: 250px;
 }
+
+.sidebar .profile-details #btn{
+  opacity: 0;
+  visibility: hidden;
+
+}
+
+.sidebar.open .profile-details #btn{
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.5s ease, visibility 0s;
+  position: absolute;
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+  font-size: 22px;
+  transition: all 0.4s ease;
+  text-align: center;
+  cursor: pointer;
+}
+
+
 .sidebar li .profile-details{
   display: flex;
   align-items: center;
@@ -316,7 +342,6 @@ nav a.active{
   font-size: 2rem;
   margin-bottom: 20px;
   color: #fff;
-  background-color: #118D6C;
 }
 .input-field {
   position: relative;

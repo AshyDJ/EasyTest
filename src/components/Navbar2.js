@@ -1,8 +1,25 @@
 import React, { useEffect, useState } from 'react';
 import './style.css'; // Ensure this path is correct
-import { NavLink } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'
+import fetchConfig from './Config';
 
 const Navbar2 = () => {
+  const navigate=useNavigate();
+
+  const removeToken =  async (e) => {
+    // eslint-disable-next-line no-restricted-globals
+    if(confirm("Are you sure you want to log out?")){
+    //const config = await fetchConfig();
+    fetch(`${process.env.REACT_APP_BACKEND_URL}/clear_User_status`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({user:token.user_name}),
+    }); 
+    sessionStorage.removeItem('token')
+      navigate('/login') 
+  }
+  }
+
 
   useEffect(() => {
     const sidebar = document.querySelector(".sidebar");
@@ -89,15 +106,16 @@ const Navbar2 = () => {
        </NavLink>
      <span className="tooltip">Reports</span>
    </li>   
+
   
    <li className="profile">
-       <div className="profile-details">
+       <div className="profile-details">    
          <div className="name_job">
            <div className="name"> {token ? token.user_name : ''}</div>
            <div className="job">SocIT </div>
          </div>
-       </div>
-       
+         <i className='bx bxs-log-out' id="btn" onClick={removeToken}></i>
+       </div>     
    </li>
   </ul>
 </div>

@@ -8,20 +8,32 @@ import fetchConfig from './Config';
 
 
   async function LoginUser(credentials) {
-    const config = await fetchConfig();
-    return fetch(`${config.backend_url}/login`,{
+    //const config = await fetchConfig();
+    return fetch(`${process.env.REACT_APP_BACKEND_URL}/login`,{
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify(credentials)
-    }).then(data => data.json())
+    }).then(response =>{
+      if (response.ok) {
+        return response.json();
+      } else if(response.status==401){
+        alert("Invalid Password");
+      }
+      else if(response.status==402){
+        alert("User name not found");
+      }
+    });
+    
+    
+    
 
   }
+
+
   const Login2 = ({setToken}) => {
 
-
-    
   const navigate=useNavigate();
   const [name, setName] = useState()
   const [password, setPassword] = useState()
@@ -29,13 +41,15 @@ import fetchConfig from './Config';
 
   const handleSubmit = async (e) => {
       e.preventDefault()
+
       const token = await LoginUser({
           name,
           password
       })
-      
-      setToken(token)
+      if(token){
+      setToken(token);
       navigate('/folder', { state: { token } });
+      }
   }
 
 
@@ -44,7 +58,7 @@ import fetchConfig from './Config';
    <>
    <nav class="nav">
         <i class="uil uil-bars navOpenBtn"></i>
-        <NavLink to='/login'>EasyTester</NavLink>
+        <NavLink to='/login'>EasyTest</NavLink>
     </nav>
     
    <div class="loginbody">

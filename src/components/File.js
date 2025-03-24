@@ -16,9 +16,9 @@ const File = () => {
     const { file } = useParams();
 
     const fetchData = async () => {
-      const config = await fetchConfig();
+      //const config = await fetchConfig();
       try {
-          const response = await fetch(`${config.backend_url}/folder/${file}/readfolderData`);
+          const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/folder/${file}/readfolderData`);
           result = await response.json();
           setData(result);
           setFiles(result);
@@ -28,9 +28,9 @@ const File = () => {
         }
       }
       const fetchfolderData = async () => {
-        const config = await fetchConfig();
+        //const config = await fetchConfig();
         try {
-            const response = await fetch(`${config.backend_url}/folder/${file}`);
+            const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/folder/${file}`);
             result = await response.json();
             setData(result);
             console.log(typeof(result));
@@ -38,8 +38,8 @@ const File = () => {
             console.error('Error fetching data:', error);
           }
         }
+
     useEffect(() => {  
-        
         fetchfolderData();
         fetchData();
     },[]);
@@ -50,25 +50,54 @@ const File = () => {
   const [type, setType] = useState('');
   var filearr=[];
 
-  const handleAddFile = async (e) => {
+  const handleCreateFile = async (e) => {
     e.preventDefault();
     var filedata={
         fname:newFile,
         type:type
     };
-    filearr.push(filedata);
-    const config = await fetchConfig();
-    fetch(`${config.backend_url}/folder/${file}/savefileData`, {
+    const index = filearr.indexOf(filedata);
+    filearr.splice(index, 1);
+    //const config = await fetchConfig();
+    fetch(`${process.env.REACT_APP_BACKEND_URL}/folder/${file}/savefileData`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(filedata)
     });
-    fetchData();
+
     setNewFile('');
     setType('');
+    fetchData();
   };
+
+
+  const handleDeleteFile = async (e) => {
+    e.preventDefault();
+    // eslint-disable-next-line no-restricted-globals
+    if(!confirm(`Are you sure you want to delete ${newFile} permanently?`))
+      return;
+    var filedata={
+        fname:newFile,
+        type:type
+    };
+    //const config = await fetchConfig();
+    const response=await fetch(`${process.env.REACT_APP_BACKEND_URL}/folder/${file}/deletefileData`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(filedata)
+    });
+    if(response.status==404)
+      alert("File Not Found");
+    
+    setNewFile('');
+    setType('');
+    fetchData();
+  };
+
 
 //Checks if session token is present for a user otherwise gotta login, sorta janky way to do
   function getToken()
@@ -97,15 +126,16 @@ const File = () => {
 
       {
       files.map((filearr, index) => (
-        <li><span key={index}>
-          <NavLink to={`/folder/${file}/testpad/${filearr}`}> {filearr}</NavLink>
-        </span></li>
+        <li>
+        <span key={index}>
+         <NavLink to={`/folder/${file}/testpad/${filearr}`}> {filearr}</NavLink>
+        </span>
+        </li>
       ))
       }
       </ul>
       <div class="file-folder-wrapper">
-      <form class='folder-file-form' onSubmit={handleAddFile}>
-        <h2>Create New File</h2>
+      <form class='folder-file-form'>
         <div class="input-field-folder-file">
         <input
           type="text"
@@ -113,9 +143,10 @@ const File = () => {
           onChange={(e) => setNewFile(e.target.value)}
            required
         /><br />
-        <label>Enter new file name</label>
+        <label>Enter file name</label>
       </div>
-      <button className='folder-file-button' type="submit">Add Folder</button>
+      <button className='folder-file-button' onClick={handleCreateFile}>Create File</button>
+      <button className='folder-file-button' onClick={handleDeleteFile}>Delete File</button>
     </form>
     </div>
     </div>
