@@ -1,3 +1,14 @@
+# EasyTest
+
+EasyTest is an open source test documentation tool for simpler and better test case management. EasyTest allows you to efficiently manage your Test Cases by providing you with a host of features embedded into a comfortable UI.
+
+Features include:
+
+- Folder and File Management
+- Keyboard driven Editor
+- Authentication
+- Test Logging
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
