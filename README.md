@@ -4,12 +4,20 @@ EasyTest is an open source test documentation tool for simpler and better test c
 
 Features include:
 
-- Folder and File Management
+- Directory and File Management
 - Keyboard driven Editor
 - Authentication
 - Test Logging
 
-# Getting Started with Create React App
+EasyTest is built using pure JavaScript, leveraging modern frameworks for an optimized experience:
+
+Frontend: React.js
+
+Backend: Express.js
+
+EasyTest is designed for testers and developers looking for a lightweight yet powerful test management solution.
+
+## Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
